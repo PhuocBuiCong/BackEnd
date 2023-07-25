@@ -1,5 +1,4 @@
 const User = require("../models/User");
-const RefreshToken = require("../models/RefreshToken");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 class UserController {
@@ -55,35 +54,46 @@ class UserController {
         //create access token
         const accessToken = jwt.sign(
           {
-            user: {
-              email: user.email,
-              id: user.id,
-            },
+            email: user.email,
+            id: user.id,
           },
           process.env.ACCESS_TOKEN_SECRET,
           { expiresIn: "30s" }
         );
-
-        //create refresh token
-        const refreshToken = jwt.sign(
-          {
-            user: {
+        let refreshToken = user.refreshToken;
+        console.log("token in db :", refreshToken);
+        if (!refreshToken) {
+          refreshToken = jwt.sign(
+            {
               email: user.email,
               id: user.id,
             },
-          },
-          process.env.REFRESH_TOKEN_SECRET,
-          { expiresIn: "7d" }
-        );
+            process.env.REFRESH_TOKEN_SECRET,
+            { expiresIn: "7d" }
+          );
+          console.log("old", refreshToken);
+          // Save refresh token in our database
+          user.refreshToken = refreshToken;
+          await user.save();
+        } else {
+          const newRefreshToken = jwt.sign(
+            {
+              email: user.email,
+              id: user.id,
+            },
+            process.env.REFRESH_TOKEN_SECRET,
+            { expiresIn: "7d" }
+          );
+          console.log("new", newRefreshToken);
 
-        // Save refresh token in our database
-        user.refreshToken = refreshToken;
-        await user.save();
+          user.refreshToken = newRefreshToken;
+          await user.save();
+        }
 
         res.status(200).json({
           message: " Authenication successfull",
           accessToken,
-          refreshToken,
+          refreshToken: user.refreshToken, // Use the updated refresh token,
         });
       } else {
         res.status(401);
@@ -91,7 +101,38 @@ class UserController {
       }
     } catch (error) {
       console.error("Login error:", error);
-      res.status(500).json({ error: "An error occurred during login" });
+      res.status(500).json({ error: "Email or password incorrect" });
+    }
+  }
+
+  // api refresh token when token expired
+  async refresh(req, res, next) {
+    const { refreshToken } = req.body;
+    try {
+      const refreshDB = await User.findOne({ refreshToken });
+      // check if token exists in db
+      if (!refreshDB) {
+        return res.status(401).json({ error: "Invalid refresh token" });
+      }
+      // Verify and decode the refresh token
+      const decodedToken = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+      );
+      console.log(decodedToken);
+      // Generate a new access token
+      const accessToken = jwt.sign(
+        {
+          email: decodedToken.email,
+          id: decodedToken.id,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "30s" }
+      );
+      res.json({ accessToken });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Server error" });
     }
   }
 }

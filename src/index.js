@@ -23,6 +23,13 @@ app.post("/api/register", UserController.register);
 // POST Login
 app.post("/api/login", UserController.login);
 
+// POST refresh
+app.post("/api/refresh", UserController.refresh);
+
+app.get("api/abc", (req, res) => {
+  return res.status(200).json("test");
+});
+
 app.get("/api/user", verifyToken, (req, res) => {
   return res.status(200).json({
     message: "Protected route",
