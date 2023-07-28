@@ -3,16 +3,14 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 class UserController {
   //  logic register
-  async register(req, res, next) {
+  async signup(req, res, next) {
     try {
       const { email, password } = req.body;
       const oldUser = await User.findOne({ email });
       if (oldUser) {
         return res
           .status(409)
-          .send(
-            "User Already Exist. Please Login or Sign up for another email"
-          );
+          .send("User Already Exist. Please Sign up for another email");
       }
 
       // Create hash password

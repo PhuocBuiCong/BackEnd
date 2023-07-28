@@ -18,7 +18,7 @@ db.connect();
 
 // Authentication
 // POST register
-app.post("/api/register", UserController.register);
+app.post("/api/signup", UserController.signup);
 
 // POST Login
 app.post("/api/login", UserController.login);
