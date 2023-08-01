@@ -5,7 +5,7 @@ class UserController {
   //  logic register
   async signup(req, res, next) {
     try {
-      const { email, password } = req.body;
+      const { email, password, role } = req.body;
       const oldUser = await User.findOne({ email });
       if (oldUser) {
         return res
@@ -18,11 +18,11 @@ class UserController {
       console.log("hashed password: ", hashedPassword);
 
       // Create user in our database
-      const newUser = new User({ email, password: hashedPassword });
+      const newUser = new User({ email, password: hashedPassword, role });
       newUser
         .save()
         .then(() => {
-          res.status(201).json({
+          res.status(200).json({
             message: "OK",
             user: { _id: newUser.id, email: newUser.email },
           });
@@ -92,6 +92,7 @@ class UserController {
           message: " Authenication successfull",
           accessToken,
           refreshToken: user.refreshToken, // Use the updated refresh token,
+          role: user.role,
         });
       } else {
         res.status(401);
