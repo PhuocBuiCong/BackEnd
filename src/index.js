@@ -26,8 +26,8 @@ app.post("/api/login", UserController.login);
 // POST refresh
 app.post("/api/refresh", UserController.refresh);
 
-app.get("api/abc", (req, res) => {
-  return res.status(200).json("test");
+app.get("/api/home", (req, res) => {
+  return res.status(200).json("home page");
 });
 
 app.get("/api/user", verifyToken, (req, res) => {
