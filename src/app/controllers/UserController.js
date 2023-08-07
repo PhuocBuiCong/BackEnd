@@ -90,6 +90,7 @@ class UserController {
 
         res.status(200).json({
           message: " Authenication successfull",
+          id: user.id,
           accessToken,
           refreshToken: user.refreshToken, // Use the updated refresh token,
           role: user.role,
@@ -134,6 +135,28 @@ class UserController {
       res.status(500).json({ error: "Server error" });
     }
   }
-}
 
+  //api get user
+  async getUser(req, res, next) {
+    const { id } = req.body;
+    console.log(id);
+    try {
+      if (!id) {
+        res.status(400);
+        throw new Error("Can not get user");
+      }
+
+      const user = await User.findOne({ _id: id });
+      res.json({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+}
 module.exports = new UserController();
