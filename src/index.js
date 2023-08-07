@@ -30,19 +30,10 @@ app.get("/api/home", (req, res) => {
   return res.status(200).json("home page");
 });
 
-app.get("/api/user", verifyToken, (req, res) => {
-  return res.status(200).json({
-    message: "Protected route",
-    elements: [
-      {
-        name: "phuocbc",
-      },
-      {
-        name: "tips js",
-      },
-    ],
-  });
-});
+app.post("/api/user", UserController.getUser);
+
+// app.post("/api/updateUser", verifyToken, UserController.update);
+
 // --------------------------------------------------------------//
 // API GET/products
 app.get("/api/products", ProductController.index);
