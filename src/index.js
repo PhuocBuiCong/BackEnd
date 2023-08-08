@@ -6,10 +6,15 @@ const port = 8000;
 const ProductController = require("./app/controllers/ProductController");
 const UserController = require("./app/controllers/UserController");
 const verifyToken = require("./middleware/auth");
+const bodyParser = require("body-parser");
 
 require("dotenv").config();
-app.use(express.json());
+app.use(express.json({ limit: "50mb", extended: true }));
+app.use(
+  express.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 })
+);
 app.use(cors());
+app.use(express.json());
 
 //connect to db
 db.connect();
@@ -32,7 +37,7 @@ app.get("/api/home", (req, res) => {
 
 app.post("/api/user", UserController.getUser);
 
-// app.post("/api/updateUser", verifyToken, UserController.update);
+app.post("/api/updateUser", UserController.update);
 
 // --------------------------------------------------------------//
 // API GET/products

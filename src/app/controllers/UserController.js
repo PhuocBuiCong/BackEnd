@@ -139,7 +139,6 @@ class UserController {
   //api get user
   async getUser(req, res, next) {
     const { id } = req.body;
-    console.log(id);
     try {
       if (!id) {
         res.status(400);
@@ -152,9 +151,38 @@ class UserController {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        imageUrl: user.imageUrl,
       });
     } catch (error) {
       console.log(error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+
+  async update(req, res, next) {
+    const { id, firstName, lastName, imageUrl } = req.body;
+    try {
+      const user = await User.findOne({ _id: id });
+      if (user) {
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.imageUrl = imageUrl;
+
+        // Save the updated user
+        await user.save();
+
+        res.status(200).json({
+          message: "User updated successfully",
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          imageUrl: user.imageUrl,
+        });
+      } else {
+        res.status(404).json({ error: "User not found" });
+      }
+    } catch (error) {
+      console.error("Update error:", error);
       res.status(500).json({ error: "Server error" });
     }
   }

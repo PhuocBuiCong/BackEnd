@@ -9,6 +9,7 @@ const User = new Schema({
   token: { type: String },
   refreshToken: { type: String },
   role: { type: String, enum: ["user", "admin"], default: "user" },
+  imageUrl: { type: String },
 });
 
 module.exports = mongoose.model("users", User);
